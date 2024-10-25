@@ -59,22 +59,37 @@ namespace ExpenseTrackerAPI.Controllers
 
         private string CreateToken(User user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
-
-            var claims = new[]
+            try
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username)
-            };
+                var key = configuration["Jwt:Key"];
+                if (string.IsNullOrEmpty(key))
+                {
+                    throw new ArgumentNullException("Jwt:Key", "JWT key is not configured.");
+                }
 
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
 
-            var token = new JwtSecurityToken(
-                claims: claims,
-                expires: DateTime.Now.AddHours(2),
-                signingCredentials: creds);
+                var claims = new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username)
+                };
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+                var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512Signature);
+
+                var token = new JwtSecurityToken(
+                    claims: claims,
+                    expires: DateTime.Now.AddHours(2),
+                    signingCredentials: creds);
+
+                return new JwtSecurityTokenHandler().WriteToken(token);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (ex) as needed
+                Console.WriteLine(ex.Message);
+                return null;
+            }
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
