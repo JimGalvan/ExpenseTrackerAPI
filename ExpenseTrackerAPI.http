@@ -1,6 +1,58 @@
 @ExpenseTrackerAPI_HostAddress = http://localhost:5107
 
-GET {{ExpenseTrackerAPI_HostAddress}}/weatherforecast/
-Accept: application/json
+### Register a new user
+POST http://localhost:5107/api/Auth/Register
+Content-Type: application/json
 
-###
+{
+  "username": "testuser",
+  "password": "Password123!"
+}
+
+### Login and get JWT token
+POST http://localhost:7218/api/Auth/Login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "Password123!"
+}
+
+
+### Get all expenses for the logged-in user
+GET http://localhost:7218/api/Expenses
+Authorization: Bearer JWT_TOKEN
+
+
+### Create a new expense
+POST http://localhost:7218/api/Expenses
+Content-Type: application/json
+Authorization: Bearer JWT_TOKEN
+
+{
+  "amount": 50.75,
+  "category": "Groceries",
+  "description": "Weekly grocery shopping"
+}
+
+
+### Get a specific expense by ID
+GET http://localhost:7218/api/Expenses/{expenseId}
+Authorization: Bearer JWT_TOKEN
+
+
+### Update an existing expense
+PUT http://localhost:7218/api/Expenses/{expenseId}
+Content-Type: application/json
+Authorization: Bearer JWT_TOKEN
+
+{
+  "amount": 60.00,
+  "category": "Groceries",
+  "description": "Updated weekly grocery shopping"
+}
+
+
+### Delete an expense
+DELETE http://localhost:7218/api/Expenses/{expenseId}
+Authorization: Bearer JWT_TOKEN
