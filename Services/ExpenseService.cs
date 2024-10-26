@@ -35,7 +35,7 @@ namespace ExpenseTrackerAPI.Services
 
         public async Task UpdateExpenseAsync(Guid userId, Expense expense)
         {
-            expense.UserId = userId;
+            
             await _expenseRepository.UpdateExpenseAsync(expense);
         }
 

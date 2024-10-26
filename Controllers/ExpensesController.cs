@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using ExpenseTrackerAPI.Models;
 using System.Security.Claims;
 using AutoMapper;
+using ExpenseTrackerAPI.Dtos;
 using ExpenseTrackerAPI.Interfaces;
 
 namespace ExpenseTrackerAPI.Controllers
@@ -27,34 +28,29 @@ namespace ExpenseTrackerAPI.Controllers
         public async Task<ActionResult<Expense>> GetExpense(Guid id)
         {
             var userId = GetUserIdFromToken();
-
             var expense = await expenseService.GetUserExpenseByIdAsync(userId, id);
-            if (expense == null)
-                return NotFound();
-
-            return Ok(expense);
+            var response = mapper.Map(expense, new Expense());
+            return Ok(response);
         }
 
         // POST: api/Expenses
         [HttpPost]
-        public async Task<ActionResult<Expense>> PostExpense(Expense expense)
+        public async Task<ActionResult<Expense>> PostExpense(ExpenseDto request)
         {
-            Guid userId = GetUserIdFromToken();
+            var expense = mapper.Map<Expense>(request);
+            var userId = GetUserIdFromToken();
             await expenseService.AddExpenseAsync(userId, expense);
-
             return CreatedAtAction(nameof(GetExpense), new { id = expense.Id }, expense);
         }
 
         // PUT: api/Expenses/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutExpense(Guid id, Expense expense)
+        public async Task<IActionResult> PutExpense(Guid id, ExpenseDto request)
         {
-            if (id != expense.Id)
-                return BadRequest();
-
-            Guid userId = GetUserIdFromToken();
+            var userId = GetUserIdFromToken();
+            var expense = await expenseService.GetUserExpenseByIdAsync(userId, id);
+            expense = mapper.Map(request, expense);
             await expenseService.UpdateExpenseAsync(userId, expense);
-
             return NoContent();
         }
 
@@ -62,9 +58,8 @@ namespace ExpenseTrackerAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteExpense(Guid id)
         {
-            Guid userId = GetUserIdFromToken();
+            var userId = GetUserIdFromToken();
             await expenseService.DeleteExpenseAsync(userId, id);
-
             return NoContent();
         }
 

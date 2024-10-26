@@ -7,6 +7,7 @@ using ExpenseTrackerAPI.Interfaces;
 using ExpenseTrackerAPI.Repositories;
 using ExpenseTrackerAPI.Services;
 using ExpenseTrackerAPI.Services.interfaces;
+using ExpenseTrackerAPI.Profiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +37,7 @@ builder.Services.AddCors(options =>
 });
 
 // Auto-mapping
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // Configure JWT authentication
 // var key = Encoding.ASCII.GetBytes("DGYecfhL/yMddqEecxu66h702G7iPZQ0WPPSjI+Umas=");
