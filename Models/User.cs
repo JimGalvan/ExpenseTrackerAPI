@@ -1,10 +1,12 @@
-﻿namespace ExpenseTrackerAPI.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ExpenseTrackerAPI.Models
 {
     public class User : BaseEntity
     {
-        public string Username { get; set; }
-        public byte[] PasswordHash { get; set; }
-        public byte[] PasswordSalt { get; set; }
-        public ICollection<Expense> Expenses { get; set; }
+        [MaxLength(50)] public string? Username { get; init; }
+        public byte[]? PasswordHash { get; init; }
+        public byte[]? PasswordSalt { get; init; }
+        public ICollection<Expense>? Expenses { get; set; }
     }
 }
