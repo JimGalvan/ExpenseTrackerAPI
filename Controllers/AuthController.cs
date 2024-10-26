@@ -15,7 +15,6 @@ namespace ExpenseTrackerAPI.Controllers
     [Route("api/[controller]")]
     public class AuthController(ExpenseTrackerContext context, IConfiguration configuration) : ControllerBase
     {
-        // POST: api/Auth/Register
         [HttpPost("Register")]
         public async Task<ActionResult> Register(UserDto request)
         {
@@ -39,7 +38,6 @@ namespace ExpenseTrackerAPI.Controllers
             return Ok("User registered successfully.");
         }
 
-        // POST: api/Auth/Login
         [HttpPost("Login")]
         public async Task<ActionResult<object>> Login(UserDto request)
         {
@@ -50,64 +48,45 @@ namespace ExpenseTrackerAPI.Controllers
             if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
                 return BadRequest("Wrong password.");
 
-            string token = CreateToken(user);
+            var token = CreateToken(user);
 
             return Ok(new { token });
         }
 
-        // Helper methods...
-
         private string CreateToken(User user)
         {
-            try
+            var key = configuration["Jwt:Key"];
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!));
+
+            var claims = new[]
             {
-                var key = configuration["Jwt:Key"];
-                if (string.IsNullOrEmpty(key))
-                {
-                    throw new ArgumentNullException("Jwt:Key", "JWT key is not configured.");
-                }
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username)
+            };
 
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512Signature);
 
-                var claims = new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.Username)
-                };
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.AddHours(2),
+                signingCredentials: creds);
 
-                var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512Signature);
-
-                var token = new JwtSecurityToken(
-                    claims: claims,
-                    expires: DateTime.Now.AddHours(2),
-                    signingCredentials: creds);
-
-                return new JwtSecurityTokenHandler().WriteToken(token);
-            }
-            catch (Exception ex)
-            {
-                // Log the exception (ex) as needed
-                Console.WriteLine(ex.Message);
-                return null;
-            }
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-            using (var hmac = new HMACSHA512())
-            {
-                passwordSalt = hmac.Key; // Generate a random key as the salt
-                passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            }
+            using var hmac = new HMACSHA512();
+            passwordSalt = hmac.Key; // Generate a random key as the salt
+            passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
         }
 
-        private bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
+        private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
         {
-            using (var hmac = new HMACSHA512(storedSalt))
-            {
-                var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return computedHash.SequenceEqual(storedHash);
-            }
+            using var hmac = new HMACSHA512(storedSalt);
+            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return computedHash.SequenceEqual(storedHash);
         }
     }
 }
