@@ -13,17 +13,19 @@ namespace ExpenseTrackerAPI.Controllers
     [Authorize]
     public class ExpensesController(IExpenseService expenseService, IMapper mapper) : ControllerBase
     {
-        // GET: api/Expenses
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Expense>>> GetExpenses()
         {
             Guid userId = GetUserIdFromToken();
 
             var expenses = await expenseService.GetUserExpensesAsync(userId);
+
+            // sort expenses by date in descending order
+            expenses = expenses.OrderByDescending(e => e.CreatedAt);
+
             return Ok(expenses);
         }
 
-        // GET: api/Expenses/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Expense>> GetExpense(Guid id)
         {
@@ -33,7 +35,6 @@ namespace ExpenseTrackerAPI.Controllers
             return Ok(response);
         }
 
-        // POST: api/Expenses
         [HttpPost]
         public async Task<ActionResult<Expense>> PostExpense(ExpenseDto request)
         {
@@ -43,7 +44,6 @@ namespace ExpenseTrackerAPI.Controllers
             return CreatedAtAction(nameof(GetExpense), new { id = expense.Id }, expense);
         }
 
-        // PUT: api/Expenses/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> PutExpense(Guid id, ExpenseDto request)
         {
@@ -54,7 +54,6 @@ namespace ExpenseTrackerAPI.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Expenses/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteExpense(Guid id)
         {

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ExpenseTrackerAPI.Core;
 using ExpenseTrackerAPI.Interfaces;
 using ExpenseTrackerAPI.Repositories;
 using ExpenseTrackerAPI.Services;
@@ -25,15 +26,16 @@ builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddDbContext<ExpenseTrackerContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add CORS policy
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
-    {
-        builder.AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
+    options.AddPolicy("AllowAllOrigins",
+        policyBuilder =>
+        {
+            policyBuilder // or the actual URL of your React app
+                .WithOrigins("http://localhost:3000") // Specify your allowed domain here
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
 });
 
 // Auto-mapping
@@ -50,7 +52,7 @@ builder.Services.AddAuthentication(options =>
     })
     .AddJwtBearer(options =>
     {
-        options.RequireHttpsMetadata = false; // Set to true in production
+        options.RequireHttpsMetadata = false;
         options.SaveToken = true;
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -65,9 +67,13 @@ builder.Services.AddAuthentication(options =>
 // Add Controllers
 builder.Services.AddControllers();
 
+// token
+builder.Services.AddSingleton<ITokenBlacklistService, TokenBlacklistService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseCors("AllowAllOrigins");
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -80,5 +86,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<TokenBlacklistMiddleware>();
 
 app.Run();

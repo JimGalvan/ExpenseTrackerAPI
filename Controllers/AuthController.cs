@@ -8,12 +8,16 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Security.Claims;
 using ExpenseTrackerAPI.Dtos;
+using ExpenseTrackerAPI.Services;
 
 namespace ExpenseTrackerAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController(ExpenseTrackerContext context, IConfiguration configuration) : ControllerBase
+    public class AuthController(
+        ExpenseTrackerContext context,
+        IConfiguration configuration,
+        ITokenBlacklistService tokenBlacklistService) : ControllerBase
     {
         [HttpPost("Register")]
         public async Task<ActionResult> Register(UserDto request)
@@ -51,6 +55,18 @@ namespace ExpenseTrackerAPI.Controllers
             var token = CreateToken(user);
 
             return Ok(new { token });
+        }
+
+        [HttpPost("Logout")]
+        public IActionResult Logout()
+        {
+            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            if (string.IsNullOrEmpty(token))
+                return BadRequest("Token is required.");
+
+            tokenBlacklistService.BlacklistToken(token);
+
+            return Ok("User logged out successfully.");
         }
 
         private string CreateToken(User user)
