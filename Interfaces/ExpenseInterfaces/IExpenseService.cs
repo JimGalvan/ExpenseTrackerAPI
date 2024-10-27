@@ -9,5 +9,6 @@ namespace ExpenseTrackerAPI.Interfaces
         Task AddExpenseAsync(Guid userId, Expense expense);
         Task UpdateExpenseAsync(Guid userId, Expense expense);
         Task DeleteExpenseAsync(Guid userId, Guid expenseId);
+        decimal PredictWithLinearRegression(List<Expense> expenses);
     }
 }
