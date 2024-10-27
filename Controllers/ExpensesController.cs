@@ -13,12 +13,12 @@ namespace ExpenseTrackerAPI.Controllers
     [Authorize]
     public class ExpensesController(IExpenseService expenseService, IMapper mapper) : ControllerBase
     {
-        [HttpGet("predictWithLinearRegression")]
-        public async Task<ActionResult<decimal>> PredictWithLinearRegression()
+        [HttpGet("predictWithMovingAverage")]
+        public async Task<ActionResult<decimal>> PredictWithMovingAverage([FromQuery] int days = 7)
         {
             var userId = GetUserIdFromToken();
             var expenses = await expenseService.GetUserExpensesAsync(userId);
-            var predictedAmount = expenseService.PredictWithLinearRegression(expenses.ToList());
+            var predictedAmount = expenseService.PredictWithMovingAverage(expenses.ToList(), days);
             return Ok(predictedAmount);
         }
 
