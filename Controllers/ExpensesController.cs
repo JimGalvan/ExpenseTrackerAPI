@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ExpenseTrackerAPI.Models;
-using System.Security.Claims;
 using AutoMapper;
 using ExpenseTrackerAPI.Dtos;
 using ExpenseTrackerAPI.Interfaces;
+using static ExpenseTrackerAPI.Core.ControllerUtils;
 
 namespace ExpenseTrackerAPI.Controllers
 {
@@ -16,7 +16,7 @@ namespace ExpenseTrackerAPI.Controllers
         [HttpGet("predictWithMovingAverage")]
         public async Task<ActionResult<decimal>> PredictWithMovingAverage([FromQuery] int days = 7)
         {
-            var userId = GetUserIdFromToken();
+            var userId = GetUserIdFromToken(this);
             var expenses = await expenseService.GetUserExpensesAsync(userId);
             var predictedAmount = expenseService.PredictWithMovingAverage(expenses.ToList(), days);
             return Ok(predictedAmount);
@@ -25,8 +25,7 @@ namespace ExpenseTrackerAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Expense>>> GetExpenses()
         {
-            Guid userId = GetUserIdFromToken();
-
+            Guid userId = GetUserIdFromToken(this);
             var expenses = await expenseService.GetUserExpensesAsync(userId);
 
             // sort expenses by date in descending order
@@ -38,7 +37,7 @@ namespace ExpenseTrackerAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Expense>> GetExpense(Guid id)
         {
-            var userId = GetUserIdFromToken();
+            var userId = GetUserIdFromToken(this);
             var expense = await expenseService.GetUserExpenseByIdAsync(userId, id);
             var response = mapper.Map(expense, new Expense());
             return Ok(response);
@@ -48,7 +47,7 @@ namespace ExpenseTrackerAPI.Controllers
         public async Task<ActionResult<Expense>> PostExpense(ExpenseDto request)
         {
             var expense = mapper.Map<Expense>(request);
-            var userId = GetUserIdFromToken();
+            var userId = GetUserIdFromToken(this);
             await expenseService.AddExpenseAsync(userId, expense);
             return CreatedAtAction(nameof(GetExpense), new { id = expense.Id }, expense);
         }
@@ -56,7 +55,7 @@ namespace ExpenseTrackerAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutExpense(Guid id, ExpenseDto request)
         {
-            var userId = GetUserIdFromToken();
+            var userId = GetUserIdFromToken(this);
             var expense = await expenseService.GetUserExpenseByIdAsync(userId, id);
             expense = mapper.Map(request, expense);
             await expenseService.UpdateExpenseAsync(userId, expense);
@@ -66,15 +65,9 @@ namespace ExpenseTrackerAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteExpense(Guid id)
         {
-            var userId = GetUserIdFromToken();
+            var userId = GetUserIdFromToken(this);
             await expenseService.DeleteExpenseAsync(userId, id);
             return NoContent();
-        }
-
-        private Guid GetUserIdFromToken()
-        {
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.Parse(userIdString!);
         }
     }
 }

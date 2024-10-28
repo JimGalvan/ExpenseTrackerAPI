@@ -7,12 +7,11 @@ namespace ExpenseTrackerAPI.Models
     {
         public DateTime Date { get; init; } = DateTime.Now;
         public decimal Amount { get; init; }
-
-        [MaxLength(100)] public string? Category { get; init; }
-
         [MaxLength(500)] public string? Description { get; init; }
-
         public Guid UserId { get; set; }
         [ForeignKey("UserId")] public User? User { get; init; }
+
+        public Guid? CategoryId { get; set; }
+        [ForeignKey("CategoryId")] public Category? Category { get; init; }
     }
 }
