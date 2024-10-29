@@ -2,6 +2,9 @@
 
 ExpenseTrackerAPI is a web API for tracking expenses. It is built using ASP.NET Core and Entity Framework Core, with support for JWT authentication.
 
+## Frontend - React and TypeScript:
+repo: https://github.com/JimGalvan/ExpenseTrackerWeb
+
 ## Features
 
 - User authentication with JWT
