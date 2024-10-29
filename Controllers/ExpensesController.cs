@@ -5,6 +5,8 @@ using AutoMapper;
 using ExpenseTrackerAPI.Dtos;
 using ExpenseTrackerAPI.Dtos.Expenses;
 using ExpenseTrackerAPI.Interfaces;
+using ExpenseTrackerAPI.Interfaces.Services;
+using Microsoft.IdentityModel.Tokens;
 using static ExpenseTrackerAPI.Core.ControllerUtils;
 
 namespace ExpenseTrackerAPI.Controllers
@@ -12,7 +14,8 @@ namespace ExpenseTrackerAPI.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class ExpensesController(IExpenseService expenseService, IMapper mapper) : ControllerBase
+    public class ExpensesController(IExpenseService expenseService, ICategoryService categoryService, IMapper mapper)
+        : ControllerBase
     {
         [HttpGet("predictWithMovingAverage")]
         public async Task<ActionResult<decimal>> PredictWithMovingAverage([FromQuery] int days = 7)
@@ -28,10 +31,7 @@ namespace ExpenseTrackerAPI.Controllers
         {
             Guid userId = GetUserIdFromToken(this);
             var expenses = await expenseService.GetUserExpensesAsync(userId);
-
-            // sort expenses by date in descending order
             expenses = expenses.OrderByDescending(e => e.CreatedAt);
-
             return Ok(expenses);
         }
 
@@ -47,15 +47,25 @@ namespace ExpenseTrackerAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Expense>> PostExpense(CreateExpenseRequestDto request)
         {
-            var expense = mapper.Map<Expense>(request);
             var userId = GetUserIdFromToken(this);
-            
+            var expense = new Expense
+            {
+                Amount = request.Amount,
+                Description = request.Description
+            };
+
+            if (!request.CategoryId.IsNullOrEmpty())
+            {
+                var category = await categoryService.GetCategoryByIdAsync(Guid.Parse(request.CategoryId));
+                expense.Category = category;
+            }
+
             await expenseService.AddExpenseAsync(userId, expense);
             return CreatedAtAction(nameof(GetExpense), new { id = expense.Id }, expense);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutExpense(Guid id, ExpenseDto request)
+        public async Task<IActionResult> PutExpense(Guid id, UpdateExpenseRequestDto request)
         {
             var userId = GetUserIdFromToken(this);
             var expense = await expenseService.GetUserExpenseByIdAsync(userId, id);

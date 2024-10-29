@@ -13,6 +13,7 @@ namespace ExpenseTrackerAPI.Core.Profiles
             CreateMap<ExpenseDto, Expense>();
             CreateMap<CategoryDto, Category>();
             CreateMap<CreateExpenseRequestDto, Expense>();
+            CreateMap<UpdateExpenseRequestDto, Expense>();
         }
     }
 }

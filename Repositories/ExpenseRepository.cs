@@ -11,6 +11,7 @@ namespace ExpenseTrackerAPI.Repositories
         {
             return await context.Expenses
                 .Where(e => e.UserId == userId)
+                .Include(e => e.Category)
                 .AsNoTracking()
                 .ToListAsync();
         }

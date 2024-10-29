@@ -12,6 +12,6 @@ namespace ExpenseTrackerAPI.Models
         [ForeignKey("UserId")] public User? User { get; init; }
 
         public Guid? CategoryId { get; set; }
-        [ForeignKey("CategoryId")] public Category? Category { get; init; }
+        [ForeignKey("CategoryId")] public Category? Category { get; set; }
     }
 }
