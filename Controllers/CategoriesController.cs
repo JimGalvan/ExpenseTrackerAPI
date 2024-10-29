@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ExpenseTrackerAPI.Dtos;
+using ExpenseTrackerAPI.Dtos.Categories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ExpenseTrackerAPI.Models;

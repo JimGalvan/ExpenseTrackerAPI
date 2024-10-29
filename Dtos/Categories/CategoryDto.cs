@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ExpenseTrackerAPI.Dtos;
+namespace ExpenseTrackerAPI.Dtos.Categories;
 
 public class CategoryDto
 {

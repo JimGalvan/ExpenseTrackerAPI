@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using ExpenseTrackerAPI.Models;
 using AutoMapper;
 using ExpenseTrackerAPI.Dtos;
+using ExpenseTrackerAPI.Dtos.Expenses;
 using ExpenseTrackerAPI.Interfaces;
 using static ExpenseTrackerAPI.Core.ControllerUtils;
 
@@ -44,10 +45,11 @@ namespace ExpenseTrackerAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Expense>> PostExpense(ExpenseDto request)
+        public async Task<ActionResult<Expense>> PostExpense(CreateExpenseRequestDto request)
         {
             var expense = mapper.Map<Expense>(request);
             var userId = GetUserIdFromToken(this);
+            
             await expenseService.AddExpenseAsync(userId, expense);
             return CreatedAtAction(nameof(GetExpense), new { id = expense.Id }, expense);
         }
