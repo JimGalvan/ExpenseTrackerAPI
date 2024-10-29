@@ -1,4 +1,5 @@
-﻿using ExpenseTrackerAPI.Dtos;
+﻿using AutoMapper;
+using ExpenseTrackerAPI.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ExpenseTrackerAPI.Models;
@@ -10,7 +11,7 @@ namespace ExpenseTrackerAPI.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class CategoriesController(ICategoryService categoryService) : ControllerBase
+    public class CategoriesController(ICategoryService categoryService, IMapper mapper) : ControllerBase
     {
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
@@ -52,14 +53,7 @@ namespace ExpenseTrackerAPI.Controllers
                 request.Color = ColorGenerator.GenerateRandomLightColor();
             }
 
-            var updatedCategory = new Category
-            {
-                Id = category.Id,
-                Name = request.Name,
-                Color = request.Color,
-                UserId = category.UserId
-            };
-
+            var updatedCategory = mapper.Map(request, category);
             await categoryService.UpdateCategoryAsync(updatedCategory);
             return NoContent();
         }

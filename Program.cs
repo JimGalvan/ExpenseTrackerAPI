@@ -4,13 +4,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ExpenseTrackerAPI.Core;
+using ExpenseTrackerAPI.Core.Profiles;
 using ExpenseTrackerAPI.Interfaces;
 using ExpenseTrackerAPI.Interfaces.Repositories;
 using ExpenseTrackerAPI.Interfaces.Services;
 using ExpenseTrackerAPI.Repositories;
 using ExpenseTrackerAPI.Services;
 using ExpenseTrackerAPI.Services.interfaces;
-using ExpenseTrackerAPI.Profiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
