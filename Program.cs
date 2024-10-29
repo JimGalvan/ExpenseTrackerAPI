@@ -5,6 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ExpenseTrackerAPI.Core;
 using ExpenseTrackerAPI.Interfaces;
+using ExpenseTrackerAPI.Interfaces.Repositories;
+using ExpenseTrackerAPI.Interfaces.Services;
 using ExpenseTrackerAPI.Repositories;
 using ExpenseTrackerAPI.Services;
 using ExpenseTrackerAPI.Services.interfaces;
@@ -21,6 +23,8 @@ builder.Services.AddControllers();
 // Dependency injection
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 // Add database context
 builder.Services.AddDbContext<ExpenseTrackerContext>(options =>

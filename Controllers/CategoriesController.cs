@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ExpenseTrackerAPI.Dtos;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ExpenseTrackerAPI.Models;
 using ExpenseTrackerAPI.Interfaces.Services;
@@ -9,53 +10,64 @@ namespace ExpenseTrackerAPI.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class CategoriesController : ControllerBase
+    public class CategoriesController(ICategoryService categoryService) : ControllerBase
     {
-        private readonly ICategoryService _categoryService;
-
-        public CategoriesController(ICategoryService categoryService)
-        {
-            _categoryService = categoryService;
-        }
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
         {
             var userId = GetUserIdFromToken(this);
-            var categories = await _categoryService.GetAllCategoriesAsyncByUserId(userId);
+            var categories = await categoryService.GetAllCategoriesAsyncByUserId(userId);
             return Ok(categories);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Category>> GetCategory(Guid id)
         {
-            var category = await _categoryService.GetCategoryByIdAsync(id);
+            var category = await categoryService.GetCategoryByIdAsync(id);
             return Ok(category);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Category>> PostCategory(Category category)
+        public async Task<ActionResult<Category>> PostCategory(CategoryDto request)
         {
-            await _categoryService.AddCategoryAsync(category);
+            var userId = GetUserIdFromToken(this);
+            var randomColor = ColorGenerator.GenerateRandomLightColor();
+            var category = new Category
+            {
+                Name = request.Name,
+                Color = randomColor,
+                UserId = userId
+            };
+            await categoryService.AddCategoryAsync(category);
             return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(Guid id, Category category)
+        public async Task<IActionResult> PutCategory(Guid id, CategoryDto request)
         {
-            if (id != category.Id)
+            var category = await categoryService.GetCategoryByIdAsync(id);
+
+            if (request.Color == null)
             {
-                return BadRequest();
+                request.Color = ColorGenerator.GenerateRandomLightColor();
             }
 
-            await _categoryService.UpdateCategoryAsync(category);
+            var updatedCategory = new Category
+            {
+                Id = category.Id,
+                Name = request.Name,
+                Color = request.Color,
+                UserId = category.UserId
+            };
+
+            await categoryService.UpdateCategoryAsync(updatedCategory);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
-            await _categoryService.DeleteCategoryAsync(id);
+            await categoryService.DeleteCategoryAsync(id);
             return NoContent();
         }
     }

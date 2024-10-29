@@ -4,38 +4,32 @@ using ExpenseTrackerAPI.Models;
 
 namespace ExpenseTrackerAPI.Services
 {
-    public class CategoryService : ICategoryService
+    public class CategoryService(ICategoryRepository categoryRepository) : ICategoryService
     {
-        private readonly ICategoryRepository _categoryRepository;
-
-        public CategoryService(ICategoryRepository categoryRepository)
-        {
-            _categoryRepository = categoryRepository;
-        }
-
+        
         public async Task<List<Category>> GetAllCategoriesAsyncByUserId(Guid userId)
         {
-            return await _categoryRepository.GetCategoriesByUserIdAsync(userId);
+            return await categoryRepository.GetCategoriesByUserIdAsync(userId);
         }
 
         public async Task<Category> GetCategoryByIdAsync(Guid id)
         {
-            return await _categoryRepository.GetByIdAsync(id);
+            return await categoryRepository.GetByIdAsync(id);
         }
 
         public async Task AddCategoryAsync(Category category)
         {
-            await _categoryRepository.AddAsync(category);
+            await categoryRepository.AddAsync(category);
         }
 
         public async Task UpdateCategoryAsync(Category category)
         {
-            await _categoryRepository.UpdateAsync(category);
+            await categoryRepository.UpdateAsync(category);
         }
 
         public async Task DeleteCategoryAsync(Guid id)
         {
-            await _categoryRepository.DeleteAsync(id);
+            await categoryRepository.DeleteAsync(id);
         }
     }
 }

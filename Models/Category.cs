@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ExpenseTrackerAPI.Models;
 
+[Table("Categories")]
 public class Category : BaseEntity
 {
     [Required] [MaxLength(100)] public string? Name { get; init; }
